@@ -45,8 +45,8 @@ done
 
 deployment_system=sap_deployer
 
-environment=$(grep "environment" "${parameterfile}" -m1  | cut -d: -f2 | cut -d, -f1 | tr -d \")
-region=$(grep "region" "${parameterfile}" -m1  | cut -d: -f2 | cut -d, -f1 | tr -d \")
+environment=$(grep "environment" "${parameterfile}" -m1  | cut -d: -f2 | cut -d, -f1 | tr -d \" | xargs)
+region=$(grep "region" "${parameterfile}" -m1  | cut -d: -f2 | cut -d, -f1 | tr -d \" | xargs)
 
 key=$(echo "${parameterfile}" | cut -d. -f1)
 
