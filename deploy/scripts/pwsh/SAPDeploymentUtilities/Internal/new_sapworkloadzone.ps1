@@ -65,20 +65,14 @@ Licensed under the MIT license.
         $deployer_tfstate_key = $iniContent[$region]["Deployer"].Trim()
     }
 
-    try {
-        if ($null -ne $iniContent[$combined] ) {
-            $iniContent[$combined]["Landscape"] = $envkey
-            Out-IniFile -InputObject $iniContent -FilePath $filePath
-        }
-        else {
-            $Category1 = @{"Landscape" = $envkey }
-            $iniContent += @{$combined = $Category1 }
-            Out-IniFile -InputObject $iniContent -FilePath $filePath
-        }
-                
+    if ($null -ne $iniContent[$combined] ) {
+        $iniContent[$combined]["Landscape"] = $envkey
+        Out-IniFile -InputObject $iniContent -FilePath $filePath
     }
-    catch {
-        
+    else {
+        $Category1 = @{"Landscape" = $envkey }
+        $iniContent += @{$combined = $Category1 }
+        Out-IniFile -InputObject $iniContent -FilePath $filePath
     }
 
     $rgName = $iniContent[$region]["REMOTE_STATE_RG"].Trim() 
@@ -87,7 +81,7 @@ Licensed under the MIT license.
 
 
     # Subscription
-    $sub = $iniContent[$region]["subscription"].Trim() 
+    $sub = $iniContent[$combined]["subscription"].Trim() 
     $repo = $iniContent["Common"]["repo"].Trim()
     $changed = $false
 
