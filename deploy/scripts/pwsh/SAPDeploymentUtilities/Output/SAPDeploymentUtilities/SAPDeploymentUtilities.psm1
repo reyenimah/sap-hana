@@ -1006,20 +1006,14 @@ Licensed under the MIT license.
         $deployer_tfstate_key = $iniContent[$region]["Deployer"].Trim()
     }
 
-    try {
-        if ($null -ne $iniContent[$combined] ) {
-            $iniContent[$combined]["Landscape"] = $envkey
-            Out-IniFile -InputObject $iniContent -FilePath $filePath
-        }
-        else {
-            $Category1 = @{"Landscape" = $envkey }
-            $iniContent += @{$combined = $Category1 }
-            Out-IniFile -InputObject $iniContent -FilePath $filePath
-        }
-                
+    if ($null -ne $iniContent[$combined] ) {
+        $iniContent[$combined]["Landscape"] = $envkey
+        Out-IniFile -InputObject $iniContent -FilePath $filePath
     }
-    catch {
-        
+    else {
+        $Category1 = @{"Landscape" = $envkey }
+        $iniContent += @{$combined = $Category1 }
+        Out-IniFile -InputObject $iniContent -FilePath $filePath
     }
 
     $ans = Read-Host -Prompt "Do you want to enter the Workload SPN secrets Y/N?"
@@ -1054,7 +1048,7 @@ Licensed under the MIT license.
 
 
     # Subscription
-    $sub = $iniContent[$region]["subscription"].Trim() 
+    $sub = $iniContent[$combined]["subscription"].Trim() 
     $repo = $iniContent["Common"]["repo"].Trim()
     $changed = $false
 
