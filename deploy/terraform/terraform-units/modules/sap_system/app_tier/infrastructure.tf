@@ -58,24 +58,16 @@ resource "azurerm_lb" "scs" {
   location            = var.resource_group[0].location
   sku                 = "Standard"
 
-  frontend_ip_configuration {
-    name      = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.scs_alb_feip)
-    subnet_id = local.sub_app_exists ? data.azurerm_subnet.subnet_sap_app[0].id : azurerm_subnet.subnet_sap_app[0].id
-    private_ip_address = local.use_DHCP ? (
-      null) : (
-      try(local.scs_lb_ips[0], cidrhost(local.sub_app_prefix, 0 + local.ip_offsets.scs_lb))
-    )
-    private_ip_address_allocation = local.use_DHCP ? "Dynamic" : "Static"
-  }
-
-  frontend_ip_configuration {
-    name      = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.scs_ers_feip)
-    subnet_id = local.sub_app_exists ? data.azurerm_subnet.subnet_sap_app[0].id : azurerm_subnet.subnet_sap_app[0].id
-    private_ip_address = local.use_DHCP ? (
-      null) : (
-      try(local.scs_lb_ips[1], cidrhost(local.sub_app_prefix, 1 + local.ip_offsets.scs_lb))
-    )
-    private_ip_address_allocation = local.use_DHCP ? "Dynamic" : "Static"
+  dynamic "frontend_ip_configuration" {
+    iterator = pub
+    for_each = local.fpips
+    for_each = range( ? 0 : 1)
+    content {
+      name      = pub.name
+      subnet_id = pub.subnet_id
+      private_ip_address = pub.private_ip_address
+      private_ip_address_allocation = pub.private_ip_address_allocation
+    }
   }
 }
 
