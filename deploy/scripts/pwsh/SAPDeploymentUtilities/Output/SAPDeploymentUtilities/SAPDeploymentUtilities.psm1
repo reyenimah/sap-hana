@@ -199,7 +199,7 @@ Licensed under the MIT license.
     
         }
         try {
-            Set-SAPSPNSecrets -Region $region -Environment $Environment -VaultName $vault
+            Set-SAPSPNSecrets -Region $region -Environment $Environment -VaultName $vault  -Workload $false
         }
         catch {
             $errors_occurred = true
@@ -1007,6 +1007,32 @@ Licensed under the MIT license.
         Out-IniFile -InputObject $iniContent -FilePath $filePath
     }
 
+    $ans = Read-Host -Prompt "Do you want to enter the Workload SPN secrets Y/N?"
+    if ("Y" -eq $ans) {
+        $vault = ""
+        if ($null -ne $iniContent[$region] ) {
+            $vault = $iniContent[$region]["Vault"]
+        }
+
+        if (($null -eq $vault ) -or ("" -eq $vault)) {
+            $vault = Read-Host -Prompt "Please enter the vault name"
+            $iniContent[$region]["Vault"] = $vault 
+            Out-IniFile -InputObject $iniContent -FilePath $filePath
+    
+        }
+        try {
+            Set-SAPSPNSecrets -Region $region -Environment $Environment -VaultName $vault -Workload $true
+        }
+        catch {
+            return
+        }
+    
+        
+    }
+
+
+
+
     $rgName = $iniContent[$region]["REMOTE_STATE_RG"].Trim() 
     $saName = $iniContent[$region]["REMOTE_STATE_SA"].Trim() 
     $tfstate_resource_id = $iniContent[$region]["tfstate_resource_id"].Trim()
@@ -1338,7 +1364,10 @@ Licensed under the MIT license.
         #SPN App secret
         [Parameter(Mandatory = $true)][string]$Client_secret,
         #Tenant
-        [Parameter(Mandatory = $true)][string]$Tenant = ""
+        [Parameter(Mandatory = $true)][string]$Tenant = "",
+        #Workload
+        [Parameter(Mandatory = $true)][bool]$Workload = $true
+
     )
 
     Write-Host -ForegroundColor green ""
@@ -1349,6 +1378,10 @@ Licensed under the MIT license.
     $iniContent = Get-IniContent $filePath
 
     $combined = $Environment + $region
+
+    if($false -eq $Workload) {
+        $combined = $region
+    }
 
     if ($null -eq $iniContent[$combined]) {
         $Category1 = @{"subscription" = "" }
