@@ -282,6 +282,7 @@ resource "azurerm_firewall_network_rule_collection" "firewall-azure-app" {
 
 resource "azurerm_application_security_group" "app" {
   provider            = azurerm.main
+  count               = local.enable_deployment ? 1 : 0
   name                = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.app_asg)
   resource_group_name = var.resource_group[0].name
   location            = var.resource_group[0].location
@@ -289,6 +290,7 @@ resource "azurerm_application_security_group" "app" {
 
 resource "azurerm_application_security_group" "web" {
   provider            = azurerm.main
+  count               = local.webdispatcher_count > 0 ? 1 : 0
   name                = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.web_asg)
   resource_group_name = var.resource_group[0].name
   location            = var.resource_group[0].location
