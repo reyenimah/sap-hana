@@ -25,7 +25,7 @@ data "azurerm_key_vault_secret" "sid_password" {
 
 // Create private KV with access policy
 resource "azurerm_key_vault" "sid_kv_prvt" {
-  count                      = local.enable_sid_deployment && ! local.prvt_kv_override ? 1 : 0
+  count                      = local.enable_sid_deployment && !local.prvt_kv_override ? 1 : 0
   name                       = local.prvt_kv_name
   location                   = local.region
   resource_group_name        = local.rg_exists ? data.azurerm_resource_group.resource_group[0].name : azurerm_resource_group.resource_group[0].name
@@ -44,9 +44,9 @@ resource "azurerm_key_vault" "sid_kv_prvt" {
   }
 
   lifecycle {
-      ignore_changes = [
-          soft_delete_enabled
-      ]
+    ignore_changes = [
+      soft_delete_enabled
+    ]
   }
 
 }
@@ -60,7 +60,7 @@ data "azurerm_key_vault" "sid_kv_prvt" {
 
 // Create user KV with access policy
 resource "azurerm_key_vault" "sid_kv_user" {
-  count                      = local.enable_sid_deployment && ! local.user_kv_override ? 1 : 0
+  count                      = local.enable_sid_deployment && !local.user_kv_override ? 1 : 0
   name                       = local.user_kv_name
   location                   = local.region
   resource_group_name        = local.rg_exists ? data.azurerm_resource_group.resource_group[0].name : azurerm_resource_group.resource_group[0].name
@@ -84,11 +84,11 @@ resource "azurerm_key_vault" "sid_kv_user" {
     ]
 
   }
-  
+
   lifecycle {
-      ignore_changes = [
-          soft_delete_enabled
-      ]
+    ignore_changes = [
+      soft_delete_enabled
+    ]
   }
 
 }
@@ -121,7 +121,7 @@ resource "random_id" "sapsystem" {
 
 // Generate random password if password is set as authentication type and user doesn't specify a password, and save in KV
 resource "random_password" "password" {
-  count            = ! local.use_local_credentials ? 0 : length(trimspace(try(var.authentication.password, ""))) > 0 ? 0 : 1
+  count            = !local.use_local_credentials ? 0 : length(trimspace(try(var.authentication.password, ""))) > 0 ? 0 : 1
   length           = 32
   special          = true
   override_special = "_%@"

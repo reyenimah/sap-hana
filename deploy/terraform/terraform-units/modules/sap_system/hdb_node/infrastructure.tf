@@ -1,10 +1,7 @@
 // AVAILABILITY SET
 resource "azurerm_availability_set" "hdb" {
-  count = local.enable_deployment && local.use_avset && ! local.availabilitysets_exist ? max(length(local.zones), 1) : 0
-  name = local.zonal_deployment ? (
-    format("%s%sz%s%s%s", local.prefix, var.naming.separator, local.zones[count.index], var.naming.separator, local.resource_suffixes.db_avset)) : (
-    format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.db_avset)
-  )
+  count                        = local.enable_deployment && local.use_avset && !local.availabilitysets_exist ? max(length(local.zones), 1) : 0
+  name                         = format("%s%s%s", local.prefix, var.naming.separator, var.naming.db_avset_names[count.index])
   location                     = var.resource_group[0].location
   resource_group_name          = var.resource_group[0].name
   platform_update_domain_count = 20
@@ -29,7 +26,7 @@ resource "azurerm_lb" "hdb" {
   name                = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.db_alb)
   resource_group_name = var.resource_group[0].name
   location            = var.resource_group[0].location
-  sku                 = "Standard" 
+  sku                 = "Standard"
 
   frontend_ip_configuration {
     name                          = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.db_alb_feip)
@@ -41,9 +38,9 @@ resource "azurerm_lb" "hdb" {
 }
 
 resource "azurerm_lb_backend_address_pool" "hdb" {
-  count               = local.enable_deployment ? 1 : 0
-  name                = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.db_alb_bepool)
-  loadbalancer_id     = azurerm_lb.hdb[count.index].id
+  count           = local.enable_deployment ? 1 : 0
+  name            = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.db_alb_bepool)
+  loadbalancer_id = azurerm_lb.hdb[count.index].id
 
 }
 

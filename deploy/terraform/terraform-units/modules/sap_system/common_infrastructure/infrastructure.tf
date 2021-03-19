@@ -19,7 +19,7 @@ data "azurerm_virtual_network" "vnet_sap" {
 
 // Creates admin subnet of SAP VNET
 resource "azurerm_subnet" "admin" {
-  count                = ! local.sub_admin_exists && local.enable_admin_subnet ? 1 : 0
+  count                = !local.sub_admin_exists && local.enable_admin_subnet ? 1 : 0
   name                 = local.sub_admin_name
   resource_group_name  = local.vnet_sap_resource_group_name
   virtual_network_name = local.vnet_sap_name
@@ -27,13 +27,13 @@ resource "azurerm_subnet" "admin" {
 }
 
 resource "azurerm_subnet_route_table_association" "admin" {
-  count          = ! local.sub_admin_exists && length(local.route_table_id) > 0 ? 1 : 0
+  count          = !local.sub_admin_exists && length(local.route_table_id) > 0 ? 1 : 0
   subnet_id      = azurerm_subnet.admin[0].id
   route_table_id = local.route_table_id
 }
 
 resource "azurerm_route" "admin" {
-  count                  = ! local.sub_admin_exists && length(local.firewall_ip) > 0 ? 1 : 0
+  count                  = !local.sub_admin_exists && length(local.firewall_ip) > 0 ? 1 : 0
   name                   = format("%s%s%s%s", local.prefix, var.naming.separator, "admin", "route")
   resource_group_name    = local.vnet_sap_resource_group_name
   route_table_name       = local.route_table_name
@@ -60,7 +60,7 @@ resource "azurerm_subnet" "db" {
 }
 
 resource "azurerm_subnet_route_table_association" "db" {
-  count          = ! local.sub_admin_exists && length(local.route_table_id) > 0 ? 1 : 0
+  count          = !local.sub_admin_exists && length(local.route_table_id) > 0 ? 1 : 0
   subnet_id      = azurerm_subnet.db[0].id
   route_table_id = local.route_table_id
 }
@@ -99,7 +99,7 @@ data "azurerm_storage_account" "storage_bootdiag" {
 // PROXIMITY PLACEMENT GROUP
 resource "azurerm_proximity_placement_group" "ppg" {
   count               = local.ppg_exists ? 0 : (local.zonal_deployment ? max(length(local.zones), 1) : 1)
-  name                = local.zonal_deployment ? format("%s%sz%s%s", local.prefix, var.naming.separator, local.zones[count.index], local.resource_suffixes.ppg) : local.ppg_names[count.index]
+  name                = format("%s%s", local.prefix, var.naming.ppg_names[count.index])
   resource_group_name = local.rg_exists ? data.azurerm_resource_group.resource_group[0].name : azurerm_resource_group.resource_group[0].name
   location            = local.rg_exists ? data.azurerm_resource_group.resource_group[0].location : azurerm_resource_group.resource_group[0].location
 }
@@ -116,8 +116,8 @@ resource "random_integer" "db_priority" {
   min = 2000
   max = 2999
   keepers = {
-     # Generate a new ID only when a new resource group is defined
-      resource_group = local.rg_exists ? data.azurerm_resource_group.resource_group[0].name : azurerm_resource_group.resource_group[0].name
+    # Generate a new ID only when a new resource group is defined
+    resource_group = local.rg_exists ? data.azurerm_resource_group.resource_group[0].name : azurerm_resource_group.resource_group[0].name
   }
 }
 
@@ -132,9 +132,9 @@ resource "azurerm_firewall_network_rule_collection" "firewall-azure" {
   action              = "Allow"
   rule {
     name                  = "Azure-Cloud"
-    source_addresses      = [local.sub_admin_prefix,local.sub_db_prefix]
+    source_addresses      = [local.sub_admin_prefix, local.sub_db_prefix]
     destination_ports     = ["*"]
-    destination_addresses = [local.firewall_service_tags] 
+    destination_addresses = [local.firewall_service_tags]
     protocols             = ["Any"]
   }
 }

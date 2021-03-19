@@ -102,7 +102,7 @@ resource "azurerm_linux_virtual_machine" "vm_dbnode" {
 
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % max(local.db_zone_count, 1)].id : var.ppg[0].id
 
-    //If more than one servers are deployed into a single zone put them in an availability set and not a zone
+  //If more than one servers are deployed into a single zone put them in an availability set and not a zone
   availability_set_id = local.use_avset ? (
     local.availabilitysets_exist ? (
       data.azurerm_availability_set.hdb[count.index % max(local.db_zone_count, 1)].id) : (
@@ -121,7 +121,7 @@ resource "azurerm_linux_virtual_machine" "vm_dbnode" {
   size                            = lookup(local.sizes, local.hdb_vms[count.index].size).compute.vm_size
   admin_username                  = var.sid_username
   admin_password                  = local.enable_auth_key ? null : var.sid_password
-  disable_password_authentication = ! local.enable_auth_password
+  disable_password_authentication = !local.enable_auth_password
 
   dynamic "os_disk" {
     iterator = disk

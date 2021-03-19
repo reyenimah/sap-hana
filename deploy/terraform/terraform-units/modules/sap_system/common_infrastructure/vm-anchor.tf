@@ -33,7 +33,7 @@ resource "azurerm_linux_virtual_machine" "anchor" {
   ]
   size                            = local.anchor_size
   admin_username                  = local.sid_auth_username
-  disable_password_authentication = ! local.enable_anchor_auth_password
+  disable_password_authentication = !local.enable_anchor_auth_password
   admin_password                  = local.enable_anchor_auth_key ? null : local.sid_auth_password
 
   os_disk {
