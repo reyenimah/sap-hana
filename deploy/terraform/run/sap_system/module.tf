@@ -27,13 +27,12 @@ module "sap_namegenerator" {
   resource_offset  = try(var.options.resource_offset, 0)
 }
 
-
 module "common_infrastructure" {
-   providers = {
-    azurerm.main = azurerm.main
+  source                     = "../../terraform-units/modules/sap_system/common_infrastructure"
+  providers = {
+    azurerm.main = azurerm
     azurerm.deployer = azurerm.deployer
   }
-  source                     = "../../terraform-units/modules/sap_system/common_infrastructure"
   is_single_node_hana        = "true"
   application                = var.application
   databases                  = var.databases
@@ -50,11 +49,11 @@ module "common_infrastructure" {
 
 // Create HANA database nodes
 module "hdb_node" {
-   providers = {
-    azurerm.main = azurerm.main
+  source                     = "../../terraform-units/modules/sap_system/hdb_node"
+  providers = {
+    azurerm.main = azurerm
     azurerm.deployer = azurerm.deployer
   }
-  source                     = "../../terraform-units/modules/sap_system/hdb_node"
   databases                  = var.databases
   infrastructure             = var.infrastructure
   options                    = local.options
@@ -78,11 +77,11 @@ module "hdb_node" {
 
 // Create Application Tier nodes
 module "app_tier" {
-   providers = {
-    azurerm.main = azurerm.main
+  source                     = "../../terraform-units/modules/sap_system/app_tier"
+  providers = {
+    azurerm.main = azurerm
     azurerm.deployer = azurerm.deployer
   }
-  source                     = "../../terraform-units/modules/sap_system/app_tier"
   application                = var.application
   infrastructure             = var.infrastructure
   options                    = local.options
@@ -110,11 +109,11 @@ module "app_tier" {
 
 // Create anydb database nodes
 module "anydb_node" {
-   providers = {
-    azurerm.main = azurerm.main
+  source                     = "../../terraform-units/modules/sap_system/anydb_node"
+  providers = {
+    azurerm.main = azurerm
     azurerm.deployer = azurerm.deployer
   }
-  source                     = "../../terraform-units/modules/sap_system/anydb_node"
   databases                  = var.databases
   infrastructure             = var.infrastructure
   options                    = var.options
@@ -138,6 +137,10 @@ module "anydb_node" {
 // Generate output files
 module "output_files" {
   source                    = "../../terraform-units/modules/sap_system/output_files"
+  providers = {
+    azurerm.main = azurerm
+    azurerm.deployer = azurerm.deployer
+  }
   application               = module.app_tier.application
   databases                 = var.databases
   infrastructure            = var.infrastructure
