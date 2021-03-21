@@ -11,6 +11,7 @@ resource "azurerm_availability_set" "hdb" {
 }
 
 data "azurerm_availability_set" "hdb" {
+  provider            = azurerm.main
   count               = local.enable_deployment && local.use_avset && local.availabilitysets_exist ? max(length(local.zones), 1) : 0
   name                = split("/", local.availabilityset_arm_ids[count.index])[8]
   resource_group_name = split("/", local.availabilityset_arm_ids[count.index])[4]
@@ -22,6 +23,7 @@ Load balancer front IP address range: .4 - .9
 +--------------------------------------4--------------------------------------*/
 
 resource "azurerm_lb" "hdb" {
+  provider            = azurerm.main
   count               = local.enable_deployment ? 1 : 0
   name                = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.db_alb)
   resource_group_name = var.resource_group[0].name
@@ -38,6 +40,7 @@ resource "azurerm_lb" "hdb" {
 }
 
 resource "azurerm_lb_backend_address_pool" "hdb" {
+  provider        = azurerm.main
   count           = local.enable_deployment ? 1 : 0
   name            = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.db_alb_bepool)
   loadbalancer_id = azurerm_lb.hdb[count.index].id
@@ -45,6 +48,7 @@ resource "azurerm_lb_backend_address_pool" "hdb" {
 }
 
 resource "azurerm_lb_probe" "hdb" {
+  provider            = azurerm.main
   count               = local.enable_deployment ? 1 : 0
   resource_group_name = var.resource_group[0].name
   loadbalancer_id     = azurerm_lb.hdb[count.index].id
@@ -67,6 +71,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "hdb" {
 }
 
 resource "azurerm_lb_rule" "hdb" {
+  provider                       = azurerm.main
   count                          = local.enable_deployment ? 1 : 0
   resource_group_name            = var.resource_group[0].name
   loadbalancer_id                = azurerm_lb.hdb[0].id
