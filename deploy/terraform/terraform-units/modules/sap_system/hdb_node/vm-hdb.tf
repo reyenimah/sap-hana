@@ -12,8 +12,9 @@ HANA DB Linux Server private IP range: .10 -
 
 # Creates the admin traffic NIC and private IP address for database nodes
 resource "azurerm_network_interface" "nics_dbnodes_admin" {
-  count = local.enable_deployment ? length(local.hdb_vms) : 0
-  name  = format("%s%s", local.hdb_vms[count.index].name, local.resource_suffixes.admin_nic)
+  provider = azurerm.main
+  count    = local.enable_deployment ? length(local.hdb_vms) : 0
+  name     = format("%s%s", local.hdb_vms[count.index].name, local.resource_suffixes.admin_nic)
 
   location                      = var.resource_group[0].location
   resource_group_name           = var.resource_group[0].name
@@ -36,8 +37,9 @@ resource "azurerm_network_interface" "nics_dbnodes_admin" {
 
 # Creates the DB traffic NIC and private IP address for database nodes
 resource "azurerm_network_interface" "nics_dbnodes_db" {
-  count = local.enable_deployment ? length(local.hdb_vms) : 0
-  name  = format("%s%s", local.hdb_vms[count.index].name, local.resource_suffixes.db_nic)
+  provider = azurerm.main
+  count    = local.enable_deployment ? length(local.hdb_vms) : 0
+  name     = format("%s%s", local.hdb_vms[count.index].name, local.resource_suffixes.db_nic)
 
   location                      = var.resource_group[0].location
   resource_group_name           = var.resource_group[0].name
@@ -60,6 +62,7 @@ resource "azurerm_network_interface" "nics_dbnodes_db" {
 }
 
 resource "azurerm_network_interface_application_security_group_association" "db" {
+  provider                      = azurerm.main
   count                         = local.enable_deployment ? length(local.hdb_vms) : 0
   network_interface_id          = azurerm_network_interface.nics_dbnodes_db[count.index].id
   application_security_group_id = var.db_asg_id
@@ -68,8 +71,9 @@ resource "azurerm_network_interface_application_security_group_association" "db"
 
 // Creates the NIC for Hana storage
 resource "azurerm_network_interface" "nics_dbnodes_storage" {
-  count = local.enable_deployment && local.enable_storage_subnet ? length(local.hdb_vms) : 0
-  name  = format("%s%s", local.hdb_vms[count.index].name, local.resource_suffixes.storage_nic)
+  provider = azurerm.main
+  count    = local.enable_deployment && local.enable_storage_subnet ? length(local.hdb_vms) : 0
+  name     = format("%s%s", local.hdb_vms[count.index].name, local.resource_suffixes.storage_nic)
 
   location                      = var.resource_group[0].location
   resource_group_name           = var.resource_group[0].name
@@ -93,6 +97,7 @@ resource "azurerm_network_interface" "nics_dbnodes_storage" {
 
 # Manages Linux Virtual Machine for HANA DB servers
 resource "azurerm_linux_virtual_machine" "vm_dbnode" {
+  provider            = azurerm.main
   depends_on          = [var.anchor_vm]
   count               = local.enable_deployment ? length(local.hdb_vms) : 0
   name                = local.hdb_vms[count.index].name
@@ -169,6 +174,7 @@ resource "azurerm_linux_virtual_machine" "vm_dbnode" {
 
 # Creates managed data disk
 resource "azurerm_managed_disk" "data_disk" {
+  provider               = azurerm.main
   count                  = local.enable_deployment ? length(local.data_disk_list) : 0
   name                   = local.data_disk_list[count.index].name
   location               = var.resource_group[0].location
@@ -186,6 +192,7 @@ resource "azurerm_managed_disk" "data_disk" {
 
 # Manages attaching a Disk to a Virtual Machine
 resource "azurerm_virtual_machine_data_disk_attachment" "vm_dbnode_data_disk" {
+  provider                  = azurerm.main
   count                     = local.enable_deployment ? length(local.data_disk_list) : 0
   managed_disk_id           = azurerm_managed_disk.data_disk[count.index].id
   virtual_machine_id        = azurerm_linux_virtual_machine.vm_dbnode[local.data_disk_list[count.index].vm_index].id
