@@ -61,7 +61,6 @@ resource "azurerm_lb" "scs" {
   dynamic "frontend_ip_configuration" {
     iterator = pub
     for_each = local.fpips
-    for_each = range( ? 0 : 1)
     content {
       name      = pub.name
       subnet_id = pub.subnet_id
