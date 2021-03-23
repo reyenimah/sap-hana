@@ -510,5 +510,5 @@ locals {
     },
   ]
 
-  fpips = (scs_high_availability && upper(local.scs_ostype) == "WINDOWS") ? merge(std_ips, winha_ips) : std_ips
+  fpips = (scs_high_availability && upper(local.scs_ostype) == "WINDOWS") ? merge(local.std_ips, local.winha_ips) : std_ips
 }
